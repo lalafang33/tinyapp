@@ -10,12 +10,7 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 const generateRandomString = () => {
-  let output = "";
-  let characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
-  for (let i = 0; i < 6; i++) {
-    output += characters.charAt(Math.floor(Math.random() * characters.length));
-  }
-  return output;
+  let output = Math.random().toString(36).substrint(2,8);
 };
 
 app.get("/urls", (req, res) => {
