@@ -8,10 +8,30 @@ const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
+const generateRandomString = () => {
+  let output = "";
+  let characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+  for (let i = 0; i < 6; i++) {
+    output += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  return output;
+};
+
+app.use(express.urlencoded({ extended: true }));
+
+app.post("/urls", (req, res) => {
+  let id = generateRandomString
+  urlDatabase[id] = req.body.longURL; // Log the POST request body to the console
+  res.send("Ok"); // Respond with 'Ok' (we will replace this)
+});
 
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase };
   res.render("urls_index", templateVars);
+});
+
+app.get("/urls/new", (req, res) => {
+  res.render("urls_new");
 });
 
 app.get("/urls/:id", (req, res) => {
@@ -34,3 +54,4 @@ app.get("/urls.json", (req, res) => {
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
+
