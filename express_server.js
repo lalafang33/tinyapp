@@ -1,9 +1,11 @@
 const express = require("express");
+const cookieParser = require('cookie-parser')
 const app = express();
 const PORT = 8080; // default port 8080
 
 app.set("view engine", "ejs"); 
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -12,21 +14,30 @@ const urlDatabase = {
 const generateRandomString = () => {
   let output = Math.random().toString(36).substrint(2,8);
 };
+
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  const templateVars = { 
+    username: req.cookies &&req.cookies["username"],//bandaid solution resole req.cookie error 
+    urls: urlDatabase };
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  const templateVars = { 
+    username: req.cookies["username"]
+  }
+  res.render("urls_new", templateVars);
 });
 
 app.get("/urls/:id", (req, res) => {
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id]};
+  const templateVars = { 
+    username: req.cookies["username"],
+    id: req.params.id, 
+    longURL: urlDatabase[req.params.id]};
   res.render("urls_show", templateVars);
 });
 
@@ -63,6 +74,21 @@ app.post('/urls/:id/edit',(req,res)=>{
   urlDatabase[id] = req.body.longURL;
   res.redirect("/urls");
 });
+
+app.post('/login', (req, res) => {
+  console.log(req.body);
+  let username = req.body.username;
+  console.log(username);
+  res.cookie("username", username);
+  res.redirect("/urls");
+});
+
+app.post('/logout', (req, res) => {
+ res.clearCookie("username");
+ res.redirect("/urls");
+});
+
+// app.post()
 
 
 
