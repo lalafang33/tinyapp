@@ -3,8 +3,7 @@ const cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
 const { getUserByEmail } = require('./helper')
 const app = express();
-const PORT = 8080; // default port 8080
-// helper
+const PORT = 8080; 
 
 const urlsForUser = (userId, data) => {
   let result = {};
@@ -39,7 +38,7 @@ const generateRandomString = () => {
 };
 
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  return res.redirect("/login");
 });
 
 app.get("/urls", (req, res) => {
@@ -84,6 +83,13 @@ app.get("/urls/:id", (req, res) => {
     return res.render("error", templateVars);
   }
 
+  if (!req.session.userId) {
+    const templateVars = {
+      errorMessage: "Please login before you can see your URLs."
+    }
+    return res.render("error", templateVars);
+  };
+
   const templateVars = {
     id: req.params.id,
     longURL: ownURL[req.params.id],
@@ -118,20 +124,32 @@ app.get("/registration", (req, res) => {
   if (userId) {
     return res.redirect('/urls');
   };
-  res.render("registration")
+  const templateVars = {
+    user: users[req.session.userId]
+  };
+  res.render("registration", templateVars);
 });
 
 app.get("/login", (req, res) => {
   if (req.session.userId) {
     return res.redirect('/urls');
   };
-  res.render("login");
+  const templateVars = {
+    user: users[req.session.userId]
+  };
+  res.render("login", templateVars);
 });
 
 
 // APP POST BELOW
 
 app.post("/urls", (req, res) => {
+  if (!req.session.userId) {
+    const templateVars = {
+      errorMessage: "Please login before you can see your URLs."
+    }
+    return res.render("error", templateVars);
+  };
   let id = generateRandomString()
   urlDatabase[id] = { longURL: req.body.longURL, userId: req.session.userId, }; 
   res.redirect(`/urls/${id}`); 
